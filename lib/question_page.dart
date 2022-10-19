@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_intern_task_recommend_app/reccomend_page.dart';
 
 class QuestionPage extends StatefulWidget {
   const QuestionPage({Key? key}) : super(key: key);
@@ -9,6 +10,10 @@ class QuestionPage extends StatefulWidget {
 
 class _QuestionPageState extends State<QuestionPage> {
   //ToDo: ここに使用する変数を定義しよう！
+  double _currentSliderValue = 0;
+  String _isSelectedItem = '選択してください';
+  // リスト
+  final selectList = ['選択してください', '肩', '首', '肩甲骨', '腰', '足'];
 
   @override
   Widget build(BuildContext context) {
@@ -38,38 +43,77 @@ class _QuestionPageState extends State<QuestionPage> {
             const SizedBox(height: 20),
             Center(
               child: Text(
-                '0',
+                '$_currentSliderValue',
                 style: TextStyle(fontSize: 20, color: Colors.green),
               ),
             ),
             Slider(
+                label: '$_currentSliderValue',
+                activeColor: Colors.green,
+                inactiveColor: Colors.grey,
                 min: 0,
                 max: 10,
-                value: 0,
+                value: _currentSliderValue,
                 divisions: 10,
-                onChanged: (value) {}),
+                onChanged: (value) {
+                  setState(() {
+                    _currentSliderValue = value;
+                  });
+                }),
             const Spacer(),
             const Text('■ 一番辛い箇所はどちらですか？', style: TextStyle(fontSize: 15)),
             const SizedBox(height: 10),
             DropdownButton(
-                items: const [
-                  DropdownMenuItem(child: Text('選択してください'), value: '選択してください'),
-                ],
-                value: '選択してください',
-                underline: Container(
-                  height: 1,
-                  color: Colors.lightGreen,
-                ),
-                isExpanded: true,
-                onChanged: (value) {}),
+              items: selectList
+                  .map((String list) =>
+                      DropdownMenuItem(value: list, child: Text(list)))
+                  .toList(),
+              value: _isSelectedItem,
+              underline: Container(
+                height: 1,
+                color: Colors.lightGreen,
+              ),
+              isExpanded: true,
+              onChanged: (String? value) {
+                setState(() {
+                  _isSelectedItem = value!;
+                });
+              },
+            ),
             const Spacer(),
             Center(
-                child: ElevatedButton(
-                    onPressed: () {},
-                    child: const Text(
-                      '決定',
-                      style: TextStyle(fontSize: 15),
-                    ))),
+              child: ElevatedButton(
+                onPressed: () {
+                  if (_currentSliderValue == 0) {
+                    const snackBar = SnackBar(
+                      backgroundColor: Colors.red,
+                      content: Text('本日のお疲れを入力してください'),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  } else if (_isSelectedItem == '選択してください') {
+                    const snackBar = SnackBar(
+                      backgroundColor: Colors.red,
+                      content: Text('一番辛い箇所を入力してください'),
+                    );
+                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RecommendPage(
+                          painPart: _isSelectedItem,
+                          tiredPoint: _currentSliderValue,
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: const Text(
+                  '決定',
+                  style: TextStyle(fontSize: 15),
+                ),
+              ),
+            ),
             const Spacer(flex: 2),
           ],
         ),
